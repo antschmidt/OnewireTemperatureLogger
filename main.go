@@ -31,8 +31,9 @@ func init() {
 
 func main() {
 	flag.Parse()
-	fmt.Println(localWebPort, onewireDeviceID, cloudflareEmail, cloudflareAccountID, cloudflareNamespaceID, cloudflareAuthKey, cloudflareKVExpiration)
+	if len(onewireDeviceID) < 1 {
 
+	}
 	http.HandleFunc("/", tempToWeb)
 	go pollTemp()
 	log.Fatal(http.ListenAndServe(localWebPort, nil))
@@ -49,7 +50,7 @@ func pollTemp() {
 }
 
 func getTemp() (c float64, f float64, err error) {
-	tempFile, err := ioutil.ReadFile(fmt.Sprintf("/sys/bus/w1/devices/%s/hwmon/hwmon1/temp1_input", onewireDeviceID))
+	tempFile, err := ioutil.ReadFile(fmt.Sprintf("/sys/bus/w1/devices/%s/hwmon/hwmon0/temp1_input", onewireDeviceID)) // ###TO-DO select device id and check for hwmon0 or parse /sys/bus/w1/devices/<oneWireDeviceID>/w1_slave
 	fmt.Println(tempFile)
 	fmt.Println([]byte("\n"))
 	if err != nil {
@@ -95,4 +96,8 @@ func tempToWeb(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("WaaWaaWaa"))
 	}
 	w.Write([]byte(fmt.Sprintf("%v Degrees F | %v Degrees C", f, c)))
+}
+
+func getDeviceID() {
+
 }
